@@ -1,6 +1,6 @@
 # Dahiya Finance Pro
 
-Full-stack online finance management software with a modern, responsive dashboard.
+Full-stack online finance management software with a modern, responsive dashboard system
 
 ## How to run
 
