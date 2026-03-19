@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Plus, Wallet, AlertCircle, Clock } from "lucide-react";
+import { Plus, AlertCircle, Clock } from "lucide-react";
 
 interface Loan {
   _id: string;
@@ -27,7 +27,7 @@ interface ActiveLoan extends Loan {
   paymentStatus?: string;
 }
 
-export default function LoansPage() {
+function LoansContent() {
   const searchParams = useSearchParams();
   const clientId = searchParams.get("clientId") || "";
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -132,7 +132,7 @@ export default function LoansPage() {
           {clientId ? "Loans for this client" : "All Loans"}
         </h2>
         {loading ? (
-          <div className="p-8 text-center text-slate-500">Loading…</div>
+          <div className="p-8 text-center text-slate-500">Loading...</div>
         ) : loans.length === 0 ? (
           <div className="p-8 text-center text-slate-500">No loans yet. Create a loan from a client page.</div>
         ) : (
@@ -185,5 +185,13 @@ export default function LoansPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function LoansPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh]"><div className="animate-pulse text-slate-500">Loading...</div></div>}>
+      <LoansContent />
+    </Suspense>
   );
 }
