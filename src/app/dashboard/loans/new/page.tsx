@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { calculateLoan } from "@/lib/loanCalculations";
@@ -14,7 +14,7 @@ const LOAN_TYPES = [
   { value: "monthly", label: "Monthly" },
 ] as const;
 
-export default function NewLoanPage() {
+function NewLoanForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const clientId = searchParams.get("clientId") || "";
@@ -203,10 +203,18 @@ export default function NewLoanPage() {
             Cancel
           </Link>
           <button type="submit" disabled={submitting} className="btn-primary flex-1">
-            {submitting ? "Creating…" : "Create Loan"}
+            {submitting ? "Creating..." : "Create Loan"}
           </button>
         </div>
       </form>
     </div>
+  );
+}
+
+export default function NewLoanPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh]"><div className="animate-pulse text-slate-500">Loading...</div></div>}>
+      <NewLoanForm />
+    </Suspense>
   );
 }
