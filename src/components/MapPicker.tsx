@@ -12,7 +12,13 @@ interface MapPickerProps {
 
 const GOOGLE_MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-export default function MapPicker({ lat, lng, address, onChange, className = "" }: MapPickerProps) {
+export default function MapPicker({
+  lat,
+  lng,
+  address,
+  onChange,
+  className = "",
+}: MapPickerProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,54 +27,69 @@ export default function MapPicker({ lat, lng, address, onChange, className = "" 
 
   useEffect(() => {
     if (!GOOGLE_MAPS_KEY || !ref.current) return;
+
     setLoading(true);
+
     const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_KEY}&libraries=places`;
     script.async = true;
     script.defer = true;
+
     script.onload = () => {
-    const google = (window as any).google;
-  
-    const map = new google.maps.Map(ref.current!, {
-      center: { lat: lat ?? 28.6139, lng: lng ?? 77.209 },
-      zoom: 14,
+      const google = (window as any).google;
+
+      const map = new google.maps.Map(ref.current!, {
+        center: { lat: lat ?? 28.6139, lng: lng ?? 77.209 },
+        zoom: 14,
       });
-      };
-      const marker = new (window as unknown as { google: { maps: { Marker: new (o: object) => { setPosition: (p: object) => void; getPosition: () => { lat: () => number; lng: () => number } } } }).google.maps.Marker({
+
+      const marker = new google.maps.Marker({
         position: { lat: lat ?? 28.6139, lng: lng ?? 77.209 },
         map,
         draggable: true,
       });
-      (window as unknown as { google: { maps: { event: { addListener: (a: object, b: string, fn: () => void) => void } } }).google.maps.event.addListener(map, "click", (e: { latLng: { lat: () => number; lng: () => number } }) => {
+
+      google.maps.event.addListener(map, "click", (e: any) => {
         marker.setPosition(e.latLng);
         onChange(e.latLng.lat(), e.latLng.lng());
       });
-      (window as unknown as { google: { maps: { event: { addListener: (a: object, b: string, fn: () => void) => void } } }).google.maps.event.addListener(marker, "dragend", () => {
+
+      google.maps.event.addListener(marker, "dragend", () => {
         const pos = marker.getPosition();
         if (pos) onChange(pos.lat(), pos.lng());
       });
+
       setLoading(false);
     };
+
     script.onerror = () => {
       setError("Failed to load map");
       setLoading(false);
     };
+
     document.head.appendChild(script);
+
     return () => {
       document.head.removeChild(script);
     };
-  }, [GOOGLE_MAPS_KEY]);
+  }, [GOOGLE_MAPS_KEY, lat, lng, onChange]);
 
   const applyManual = () => {
     const la = parseFloat(manualLat);
     const ln = parseFloat(manualLng);
-    if (!Number.isNaN(la) && !Number.isNaN(ln)) onChange(la, ln);
+    if (!Number.isNaN(la) && !Number.isNaN(ln)) {
+      onChange(la, ln);
+    }
   };
 
+  // 👉 अगर API key नहीं है तो fallback UI
   if (!GOOGLE_MAPS_KEY) {
     return (
       <div className={className}>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to enable map.</p>
+        <p className="text-sm text-slate-500 mb-2">
+          Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to enable map.
+        </p>
+
         <div className="grid grid-cols-2 gap-2">
           <input
             type="number"
@@ -87,7 +108,12 @@ export default function MapPicker({ lat, lng, address, onChange, className = "" 
             className="input-field"
           />
         </div>
-        <button type="button" onClick={applyManual} className="btn-secondary mt-2 text-sm">
+
+        <button
+          type="button"
+          onClick={applyManual}
+          className="btn-secondary mt-2 text-sm"
+        >
           Set location
         </button>
       </div>
@@ -96,10 +122,22 @@ export default function MapPicker({ lat, lng, address, onChange, className = "" 
 
   return (
     <div className={className}>
-      <div ref={ref} className="w-full h-48 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700" />
-      {loading && <p className="text-xs text-slate-500 mt-1">Loading map…</p>}
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-      <p className="text-xs text-slate-500 mt-1">Click map or drag pin to set location.</p>
+      <div
+        ref={ref}
+        className="w-full h-48 rounded-xl overflow-hidden bg-slate-200"
+      />
+
+      {loading && (
+        <p className="text-xs text-slate-500 mt-1">Loading map…</p>
+      )}
+
+      {error && (
+        <p className="text-xs text-red-500 mt-1">{error}</p>
+      )}
+
+      <p className="text-xs text-slate-500 mt-1">
+        Click map or drag pin to set location.
+      </p>
     </div>
   );
 }
