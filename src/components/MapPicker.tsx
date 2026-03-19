@@ -27,10 +27,13 @@ export default function MapPicker({ lat, lng, address, onChange, className = "" 
     script.async = true;
     script.defer = true;
     script.onload = () => {
-      const map = new (window as unknown as { google: { maps: { Map: new (el: HTMLElement, o: object) => object; LatLng: new (a: number, b: number) => object; Marker: new (o: object) => object; event: { addListener: (a: object, b: string, fn: () => void) => void } } }).google.maps.Map(ref.current!, {
-        center: { lat: lat ?? 28.6139, lng: lng ?? 77.209 },
-        zoom: 14,
+    const google = (window as any).google;
+  
+    const map = new google.maps.Map(ref.current!, {
+      center: { lat: lat ?? 28.6139, lng: lng ?? 77.209 },
+      zoom: 14,
       });
+      };
       const marker = new (window as unknown as { google: { maps: { Marker: new (o: object) => { setPosition: (p: object) => void; getPosition: () => { lat: () => number; lng: () => number } } } }).google.maps.Marker({
         position: { lat: lat ?? 28.6139, lng: lng ?? 77.209 },
         map,
