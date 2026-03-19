@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 
 interface MapPickerProps {
@@ -27,52 +26,41 @@ export default function MapPicker({
 
   useEffect(() => {
     if (!GOOGLE_MAPS_KEY || !ref.current) return;
-
     setLoading(true);
-
     const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_KEY}&libraries=places`;
     script.async = true;
     script.defer = true;
-
     script.onload = () => {
       const google = (window as any).google;
-
       const map = new google.maps.Map(ref.current!, {
         center: { lat: lat ?? 28.6139, lng: lng ?? 77.209 },
         zoom: 14,
       });
-
       const marker = new google.maps.Marker({
         position: { lat: lat ?? 28.6139, lng: lng ?? 77.209 },
         map,
         draggable: true,
       });
-
       google.maps.event.addListener(map, "click", (e: any) => {
         marker.setPosition(e.latLng);
         onChange(e.latLng.lat(), e.latLng.lng());
       });
-
       google.maps.event.addListener(marker, "dragend", () => {
         const pos = marker.getPosition();
         if (pos) onChange(pos.lat(), pos.lng());
       });
-
       setLoading(false);
     };
-
     script.onerror = () => {
       setError("Failed to load map");
       setLoading(false);
     };
-
     document.head.appendChild(script);
-
     return () => {
       document.head.removeChild(script);
     };
-  }, [GOOGLE_MAPS_KEY, lat, lng, onChange]);
+  }, [lat, lng, onChange]);
 
   const applyManual = () => {
     const la = parseFloat(manualLat);
@@ -82,14 +70,12 @@ export default function MapPicker({
     }
   };
 
-  // 👉 अगर API key नहीं है तो fallback UI
   if (!GOOGLE_MAPS_KEY) {
     return (
       <div className={className}>
         <p className="text-sm text-slate-500 mb-2">
           Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to enable map.
         </p>
-
         <div className="grid grid-cols-2 gap-2">
           <input
             type="number"
@@ -108,7 +94,6 @@ export default function MapPicker({
             className="input-field"
           />
         </div>
-
         <button
           type="button"
           onClick={applyManual}
@@ -126,15 +111,12 @@ export default function MapPicker({
         ref={ref}
         className="w-full h-48 rounded-xl overflow-hidden bg-slate-200"
       />
-
       {loading && (
-        <p className="text-xs text-slate-500 mt-1">Loading map…</p>
+        <p className="text-xs text-slate-500 mt-1">Loading map...</p>
       )}
-
       {error && (
         <p className="text-xs text-red-500 mt-1">{error}</p>
       )}
-
       <p className="text-xs text-slate-500 mt-1">
         Click map or drag pin to set location.
       </p>
